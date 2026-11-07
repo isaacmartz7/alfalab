@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AlfaLab</title>
+  <link rel="stylesheet" href="css/styles.css?v=ceja">
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <p class="eyebrow">Simulador de dilatación</p>
+      <h1>AlfaLab</h1>
+      <p class="lede">Mové la temperatura y mirá cómo cambia la medida.</p>
+      <nav class="tabs" aria-label="Secciones">
+        <button type="button" data-panel="calcular" aria-selected="true">Calcular</button>
+        <button type="button" data-panel="aparente" aria-selected="false">Aparente</button>
+        <button type="button" data-panel="comparar" aria-selected="false">Comparar</button>
+      </nav>
+    </header>
+
+    <noscript>
+      <p class="error">Activá JavaScript para usar el simulador.</p>
+    </noscript>
+
+    <section id="panel-calcular" data-panel-body="calcular">
+      <div class="workspace">
+        <div class="card">
+          <fieldset class="choices">
+            <legend>Tipo de dilatación</legend>
+            <label><input type="radio" name="modo" value="lineal" checked> Lineal</label>
+            <label><input type="radio" name="modo" value="superficial"> Superficial</label>
+            <label><input type="radio" name="modo" value="volumetrica"> Volumétrica</label>
+          </fieldset>
+
+          <label class="field">
+            <span class="lbl">Material</span>
+            <select id="calc-material"></select>
+          </label>
+
+          <fieldset class="choices range" id="calc-vidrio" hidden>
+            <legend>El vidrio viene como un rango</legend>
+            <label data-preset="min"><input type="radio" name="calc-rango" value="min"> <span></span></label>
+            <label data-preset="mid"><input type="radio" name="calc-rango" value="mid" checked> <span></span></label>
+            <label data-preset="max"><input type="radio" name="calc-rango" value="max"> <span></span></label>
+            <p class="note">La tabla no da un solo número. El medio es el promedio de los extremos.</p>
+          </fieldset>
+
+          <label class="field">
+            <span class="lbl" id="calc-medida-label">Longitud inicial, L₀</span>
+            <span class="measure">
+              <input id="calc-valor" type="text" inputmode="decimal" value="10" autocomplete="off">
+              <select id="calc-unidad" aria-label="Unidad de la medida inicial"></select>
+            </span>
+          </label>
+
+          <label class="field" id="calc-diametro-field" hidden>
+            <span class="lbl">Diámetro inicial, D₀</span>
+            <span class="measure">
+              <input id="calc-diametro" type="text" inputmode="decimal" value="" autocomplete="off">
+              <select id="calc-d-unidad" aria-label="Unidad del diámetro"></select>
+            </span>
+            <p class="note">El diámetro es una longitud: cambia con α. El área cambia con 2α.</p>
+          </label>
+
+          <div class="temps">
+            <label class="field">
+              <span class="lbl">Temperatura inicial</span>
+              <span class="measure temp">
+                <input id="calc-ti" type="text" inputmode="decimal" value="15" autocomplete="off">
+                <span class="unit">°C</span>
+              </span>
+            </label>
+            <label class="field">
+              <span class="lbl">Temperatura final</span>
+              <span class="measure temp">
+                <input id="calc-tf" type="text" inputmode="decimal" value="40" autocomplete="off">
+                <span class="unit">°C</span>
+              </span>
+            </label>
+          </div>
+          <div class="scrub">
+            <div class="scrub-top">
+              <span>Arrastrá la temperatura final</span>
+              <strong id="calc-tf-read">40 °C</strong>
+            </div>
+            <input id="calc-slider" type="range" min="-40" max="250" step="1" value="40" aria-label="Temperatura final">
+            <div class="nudge">
+              <button type="button" id="calc-minus">−1 °C</button>
+              <button type="button" id="calc-plus">+1 °C</button>
+            </div>
+          </div>
+
+          <button type="button" class="secondary" id="calc-ejemplo">Cargar ejemplo</button>
+          <p class="note" id="calc-ejemplo-nota"></p>
+        </div>
+
+        <div class="card result" aria-live="polite">
+          <div class="banner">
+            <p class="kicker" id="calc-kicker"></p>
+            <h2 id="calc-headline"></h2>
+          </div>
+          <p class="formula" id="calc-formula"></p>
+          <p class="formula-sub" id="calc-sub"></p>
+          <p class="formula" id="calc-formula-d" hidden></p>
+          <p class="formula-sub" id="calc-sub-d"></p>
+          <p class="error" id="calc-error" hidden></p>
+          <ol class="steps" id="calc-steps"></ol>
+          <figure class="figure" id="calc-figure"></figure>
+          <figure class="figure graph" id="calc-graph" hidden></figure>
+          <p class="degree" id="calc-degree"></p>
+          <p class="insight" id="calc-insight"></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-aparente" data-panel-body="aparente" hidden>
+      <div class="workspace">
+        <div class="card">
+          <p class="note stand">El líquido se dilata, y el recipiente también agranda su capacidad. Lo que se ve en el nivel es la diferencia.</p>
+
+          <label class="field">
+            <span class="lbl">Líquido</span>
+            <select id="ap-liquido"></select>
+          </label>
+          <label class="field">
+            <span class="lbl">Recipiente</span>
+            <select id="ap-recipiente"></select>
+          </label>
+
+          <fieldset class="choices range" id="ap-vidrio" hidden>
+            <legend>Vidrio del recipiente</legend>
+            <label data-preset="min"><input type="radio" name="ap-rango" value="min"> <span></span></label>
+            <label data-preset="mid"><input type="radio" name="ap-rango" value="mid" checked> <span></span></label>
+            <label data-preset="max"><input type="radio" name="ap-rango" value="max"> <span></span></label>
+          </fieldset>
+
+          <label class="field">
+            <span class="lbl">Volumen inicial, V₀</span>
+            <span class="measure">
+              <input id="ap-valor" type="text" inputmode="decimal" value="100" autocomplete="off">
+              <select id="ap-unidad" aria-label="Unidad del volumen"></select>
+            </span>
+          </label>
+
+          <div class="temps">
+            <label class="field">
+              <span class="lbl">Temperatura inicial</span>
+              <span class="measure temp">
+                <input id="ap-ti" type="text" inputmode="decimal" value="20" autocomplete="off">
+                <span class="unit">°C</span>
+              </span>
+            </label>
+            <label class="field">
+              <span class="lbl">Temperatura final</span>
+              <span class="measure temp">
+                <input id="ap-tf" type="text" inputmode="decimal" value="50" autocomplete="off">
+                <span class="unit">°C</span>
+              </span>
+            </label>
+          </div>
+          <div class="scrub">
+            <div class="scrub-top">
+              <span>Arrastrá la temperatura final</span>
+              <strong id="ap-tf-read">50 °C</strong>
+            </div>
+            <input id="ap-slider" type="range" min="-40" max="250" step="1" value="50" aria-label="Temperatura final del líquido">
+            <div class="nudge">
+              <button type="button" id="ap-minus">−1 °C</button>
+              <button type="button" id="ap-plus">+1 °C</button>
+            </div>
+          </div>
+
+          <button type="button" class="secondary" id="ap-ejemplo">Cargar ejemplo: mercurio en vidrio</button>
+        </div>
+
+        <div class="card result" aria-live="polite">
+          <div class="banner">
+            <p class="kicker" id="ap-kicker"></p>
+            <h2 id="ap-headline"></h2>
+          </div>
+          <p class="formula" id="ap-formula"></p>
+          <p class="formula-sub" id="ap-sub"></p>
+          <p class="error" id="ap-error" hidden></p>
+          <div class="metrics" id="ap-metrics"></div>
+          <ol class="steps" id="ap-steps"></ol>
+          <figure class="figure" id="ap-figure"></figure>
+          <p class="degree" id="ap-degree"></p>
+          <p class="insight" id="ap-insight"></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-comparar" data-panel-body="comparar" hidden>
+      <div class="workspace">
+        <div class="card">
+          <fieldset class="choices">
+            <legend>Qué comparar</legend>
+            <label><input type="radio" name="cmp-modo" value="lineal" checked> Longitud</label>
+            <label><input type="radio" name="cmp-modo" value="volumetrica"> Volumen</label>
+          </fieldset>
+
+          <label class="field">
+            <span class="lbl">Primer material</span>
+            <select id="cmp-a"></select>
+          </label>
+          <label class="field">
+            <span class="lbl">Segundo material</span>
+            <select id="cmp-b"></select>
+          </label>
+          <label class="field">
+            <span class="lbl">Tercer material</span>
+            <select id="cmp-c"></select>
+          </label>
+
+          <fieldset class="choices range" id="cmp-vidrio" hidden>
+            <legend>Si hay vidrio, usá</legend>
+            <label data-preset="min"><input type="radio" name="cmp-rango" value="min"> <span></span></label>
+            <label data-preset="mid"><input type="radio" name="cmp-rango" value="mid" checked> <span></span></label>
+            <label data-preset="max"><input type="radio" name="cmp-rango" value="max"> <span></span></label>
+          </fieldset>
+
+          <label class="field">
+            <span class="lbl" id="cmp-medida-label">Longitud inicial, L₀</span>
+            <span class="measure">
+              <input id="cmp-valor" type="text" inputmode="decimal" value="1" autocomplete="off">
+              <select id="cmp-unidad" aria-label="Unidad de la medida"></select>
+            </span>
+          </label>
+
+          <div class="temps">
+            <label class="field">
+              <span class="lbl">Temperatura inicial</span>
+              <span class="measure temp">
+                <input id="cmp-ti" type="text" inputmode="decimal" value="20" autocomplete="off">
+                <span class="unit">°C</span>
+              </span>
+            </label>
+            <label class="field">
+              <span class="lbl">Temperatura final</span>
+              <span class="measure temp">
+                <input id="cmp-tf" type="text" inputmode="decimal" value="120" autocomplete="off">
+                <span class="unit">°C</span>
+              </span>
+            </label>
+          </div>
+          <div class="scrub">
+            <div class="scrub-top">
+              <span>Arrastrá la temperatura final</span>
+              <strong id="cmp-tf-read">120 °C</strong>
+            </div>
+            <input id="cmp-slider" type="range" min="-40" max="250" step="1" value="120" aria-label="Temperatura final de la comparación">
+            <div class="nudge">
+              <button type="button" id="cmp-minus">−1 °C</button>
+              <button type="button" id="cmp-plus">+1 °C</button>
+            </div>
+          </div>
+
+          <button type="button" class="secondary" id="cmp-ejemplo">Cargar ejemplo</button>
+        </div>
+
+        <div class="card result" aria-live="polite">
+          <div class="banner">
+            <p class="kicker" id="cmp-kicker"></p>
+            <h2 id="cmp-headline"></h2>
+          </div>
+          <p class="error" id="cmp-error" hidden></p>
+          <div class="bars" id="cmp-bars"></div>
+          <p class="insight" id="cmp-insight"></p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>Coeficientes de las tablas 17.1 y 17.2. La unidad de α, γ y β es °C⁻¹, igual que K⁻¹ cuando se usa un intervalo de temperatura.</p>
+    </footer>
+  </div>
+
+  <script src="js/materials.js?v=alfalab"></script>
+  <script src="js/physics.js?v=alfalab"></script>
+  <script src="js/ui.js?v=movimiento3"></script>
+</body>
+</html>
