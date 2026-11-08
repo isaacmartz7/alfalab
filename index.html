@@ -4,11 +4,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AlfaLab</title>
-  <link rel="stylesheet" href="css/styles.css?v=ceja">
+  <link rel="stylesheet" href="css/styles.css?v=tema">
+  <script>
+    try {
+      var tema = localStorage.getItem("alfalab-theme");
+      if (tema === "dark" || tema === "light") document.documentElement.dataset.theme = tema;
+    } catch (e) {}
+  </script>
 </head>
 <body>
   <div class="wrap">
     <header>
+      <div class="theme" role="group" aria-label="Apariencia">
+        <button type="button" data-theme-choice="light" aria-pressed="true">Claro</button>
+        <button type="button" data-theme-choice="dark" aria-pressed="false">Oscuro</button>
+      </div>
       <p class="eyebrow">Simulador de dilatación</p>
       <h1>AlfaLab</h1>
       <p class="lede">Mové la temperatura y mirá cómo cambia la medida.</p>
@@ -278,6 +288,6 @@
 
   <script src="js/materials.js?v=alfalab"></script>
   <script src="js/physics.js?v=alfalab"></script>
-  <script src="js/ui.js?v=movimiento3"></script>
+  <script src="js/ui.js?v=tema"></script>
 </body>
 </html>

@@ -39,6 +39,7 @@ const UI = (() => {
   let keepCalcNote = false;
 
   function init() {
+    bindTheme();
     bindTabs();
     $("panel-calcular").addEventListener("input", renderCalc);
     $("panel-calcular").addEventListener("change", renderCalc);
@@ -62,6 +63,22 @@ const UI = (() => {
     loadApparentExample(false);
     loadCompareExample(false);
     showPanel("calcular");
+  }
+
+  function bindTheme() {
+    const saved = localStorage.getItem("alfalab-theme");
+    applyTheme(saved === "dark" ? "dark" : "light");
+    document.querySelectorAll("[data-theme-choice]").forEach((button) => {
+      button.addEventListener("click", () => applyTheme(button.dataset.themeChoice));
+    });
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    try { localStorage.setItem("alfalab-theme", theme); } catch (e) {}
+    document.querySelectorAll("[data-theme-choice]").forEach((button) => {
+      button.setAttribute("aria-pressed", button.dataset.themeChoice === theme ? "true" : "false");
+    });
   }
 
   function bindTabs() {
@@ -756,21 +773,21 @@ const UI = (() => {
     let marks = "";
     axisTicks(xMin, xMax).forEach((tick) => {
       const x = X(tick);
-      marks += `<line x1="${x}" y1="${top}" x2="${x}" y2="${top + plotH}" stroke="#eadfd2"/>`;
-      marks += `<text x="${x}" y="${height - 16}" text-anchor="middle" fill="#655c52" font-size="12">${num(tick)}</text>`;
+      marks += `<line x1="${x}" y1="${top}" x2="${x}" y2="${top + plotH}" stroke="var(--svg-grid)"/>`;
+      marks += `<text x="${x}" y="${height - 16}" text-anchor="middle" fill="var(--svg-tick)" font-size="12">${num(tick)}</text>`;
     });
     axisTicks(yMin, yMax).forEach((tick) => {
       const y = Y(tick);
-      marks += `<line x1="${left}" y1="${y}" x2="${left + plotW}" y2="${y}" stroke="#eadfd2"/>`;
-      marks += `<text x="${left - 8}" y="${y + 4}" text-anchor="end" fill="#655c52" font-size="12">${num(tick)}</text>`;
+      marks += `<line x1="${left}" y1="${y}" x2="${left + plotW}" y2="${y}" stroke="var(--svg-grid)"/>`;
+      marks += `<text x="${left - 8}" y="${y + 4}" text-anchor="end" fill="var(--svg-tick)" font-size="12">${num(tick)}</text>`;
     });
 
     let axes = "";
     if (xMin < 0 && xMax > 0) {
-      axes += `<line x1="${X(0)}" y1="${top}" x2="${X(0)}" y2="${top + plotH}" stroke="#c8b8a4" stroke-dasharray="4 3"/>`;
+      axes += `<line x1="${X(0)}" y1="${top}" x2="${X(0)}" y2="${top + plotH}" stroke="var(--svg-axis)" stroke-dasharray="4 3"/>`;
     }
     if (yMin < 0 && yMax > 0) {
-      axes += `<line x1="${left}" y1="${Y(0)}" x2="${left + plotW}" y2="${Y(0)}" stroke="#c8b8a4" stroke-dasharray="4 3"/>`;
+      axes += `<line x1="${left}" y1="${Y(0)}" x2="${left + plotW}" y2="${Y(0)}" stroke="var(--svg-axis)" stroke-dasharray="4 3"/>`;
     }
 
     const x1 = X(xMin);
@@ -784,14 +801,14 @@ const UI = (() => {
     const pointLabel = `${num(dT)} °C · ${num(toY(yAt(dT)))} ${yLabel}`;
 
     return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${spec.delta} contra el cambio de temperatura. En este punto, ΔT es ${num(dT)} °C y ${spec.delta} es ${num(toY(yAt(dT)))} ${yLabel}.">
-      <rect x="${left}" y="${top}" width="${plotW}" height="${plotH}" fill="#fffdf9" stroke="#e4d5c4"/>
+      <rect x="${left}" y="${top}" width="${plotW}" height="${plotH}" fill="var(--svg-plot)" stroke="var(--svg-plot-line)"/>
       ${marks}
       ${axes}
-      <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#8d3d22" stroke-width="2.5"/>
-      <circle cx="${px}" cy="${py}" r="6" fill="${hot ? "#e7a58c" : "#9ebbd4"}" stroke="#8d3d22" stroke-width="2"/>
-      <text x="${labelOnLeft ? px - 10 : px + 10}" y="${Math.max(top + 14, py - 18)}" text-anchor="${labelOnLeft ? "end" : "start"}" fill="#241c16" font-size="13">${pointLabel}</text>
-      <text x="${left + plotW / 2}" y="${height - 2}" text-anchor="middle" fill="#655c52" font-size="13">ΔT (°C)</text>
-      <text transform="rotate(-90 16 ${top + plotH / 2})" x="16" y="${top + plotH / 2}" text-anchor="middle" fill="#655c52" font-size="13">${spec.delta} (${yLabel})</text>
+      <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--svg-stroke)" stroke-width="2.5"/>
+      <circle cx="${px}" cy="${py}" r="6" fill="${hot ? "#e7a58c" : "#9ebbd4"}" stroke="var(--svg-stroke)" stroke-width="2"/>
+      <text x="${labelOnLeft ? px - 10 : px + 10}" y="${Math.max(top + 14, py - 18)}" text-anchor="${labelOnLeft ? "end" : "start"}" fill="var(--svg-ink)" font-size="13">${pointLabel}</text>
+      <text x="${left + plotW / 2}" y="${height - 2}" text-anchor="middle" fill="var(--svg-tick)" font-size="13">ΔT (°C)</text>
+      <text transform="rotate(-90 16 ${top + plotH / 2})" x="16" y="${top + plotH / 2}" text-anchor="middle" fill="var(--svg-tick)" font-size="13">${spec.delta} (${yLabel})</text>
     </svg>`;
   }
 
@@ -806,7 +823,7 @@ const UI = (() => {
 
   function emptyFigure() {
     return `<svg viewBox="0 0 420 120" role="img" aria-label="Figura vacía">
-      <rect x="24" y="46" width="250" height="32" rx="6" fill="#f4efe6" stroke="#cfc3b2"/>
+      <rect x="24" y="46" width="250" height="32" rx="6" fill="var(--svg-empty)" stroke="var(--svg-empty-line)"/>
     </svg>`;
   }
 
@@ -842,17 +859,17 @@ const UI = (() => {
     const right = left + railW + gap;
     const right0 = left + rail0 + gap0;
     const y = 72;
-    const sleeper = (x) => `<rect x="${px(x)}" y="88" width="18" height="8" rx="2" fill="#c4b49a"/>`;
+    const sleeper = (x) => `<rect x="${px(x)}" y="88" width="18" height="8" rx="2" fill="var(--svg-wood)"/>`;
     return `<svg viewBox="0 0 420 150" role="img" aria-label="Riel con junta. El largo sigue la longitud y la junta sigue la temperatura.">
-      <text x="24" y="24" fill="#5e574c" font-size="14">Riel · la junta se mueve con cada grado</text>
+      <text x="24" y="24" fill="var(--svg-muted)" font-size="14">Riel · la junta se mueve con cada grado</text>
       ${sleeper(left + 12)}
       ${sleeper(left + railW - 32)}
       ${sleeper(right + 10)}
       ${sleeper(right + railW - 30)}
-      <rect x="${px(right0)}" y="${y}" width="${px(rail0)}" height="14" rx="2" fill="none" stroke="#8a8175" stroke-width="2" stroke-dasharray="5 4"/>
+      <rect x="${px(right0)}" y="${y}" width="${px(rail0)}" height="14" rx="2" fill="none" stroke="var(--svg-ghost)" stroke-width="2" stroke-dasharray="5 4"/>
       <rect x="${px(left)}" y="${y}" width="${px(railW)}" height="14" rx="2" fill="${color}"/>
       <rect x="${px(right)}" y="${y}" width="${px(railW)}" height="14" rx="2" fill="${color}"/>
-      <text x="${px(left + railW + gap / 2)}" y="60" text-anchor="middle" fill="#8d3d22" font-size="13">junta</text>
+      <text x="${px(left + railW + gap / 2)}" y="60" text-anchor="middle" fill="var(--svg-stroke)" font-size="13">junta</text>
     </svg>`;
   }
 
@@ -864,10 +881,10 @@ const UI = (() => {
       const cx = 210;
       const cy = 118;
       return `<svg viewBox="0 0 420 210" role="img" aria-label="Disco. El tamaño sigue el área y el diámetro; el borde sigue la temperatura.">
-        <text x="24" y="24" fill="#5e574c" font-size="14">Disco · se mueve con el área, el diámetro y cada grado</text>
+        <text x="24" y="24" fill="var(--svg-muted)" font-size="14">Disco · se mueve con el área, el diámetro y cada grado</text>
         <circle cx="${cx}" cy="${cy}" r="${px(radius)}" fill="${color}"/>
-        <circle cx="${cx}" cy="${cy}" r="${px(radius0)}" fill="none" stroke="#8a8175" stroke-width="2" stroke-dasharray="5 4"/>
-        <line x1="${px(cx - radius)}" y1="${cy}" x2="${px(cx + radius)}" y2="${cy}" stroke="#8d3d22" stroke-width="2"/>
+        <circle cx="${cx}" cy="${cy}" r="${px(radius0)}" fill="none" stroke="var(--svg-ghost)" stroke-width="2" stroke-dasharray="5 4"/>
+        <line x1="${px(cx - radius)}" y1="${cy}" x2="${px(cx + radius)}" y2="${cy}" stroke="var(--svg-stroke)" stroke-width="2"/>
         <text x="${cx}" y="${cy - 8}" text-anchor="middle" fill="#241c16" font-size="14">D</text>
       </svg>`;
     }
@@ -880,9 +897,9 @@ const UI = (() => {
     const x0 = 210 - baseW / 2;
     const y0 = 124 - baseH / 2;
     return `<svg viewBox="0 0 420 210" role="img" aria-label="Placa. El tamaño sigue el área y el borde sigue la temperatura.">
-      <text x="24" y="24" fill="#5e574c" font-size="14">Placa · se mueve con el área y con cada grado</text>
+      <text x="24" y="24" fill="var(--svg-muted)" font-size="14">Placa · se mueve con el área y con cada grado</text>
       <rect x="${px(x)}" y="${px(y)}" width="${px(nowW)}" height="${px(nowH)}" rx="4" fill="${color}"/>
-      <rect x="${px(x0)}" y="${px(y0)}" width="${px(baseW)}" height="${px(baseH)}" rx="4" fill="none" stroke="#8a8175" stroke-width="2" stroke-dasharray="5 4"/>
+      <rect x="${px(x0)}" y="${px(y0)}" width="${px(baseW)}" height="${px(baseH)}" rx="4" fill="none" stroke="var(--svg-ghost)" stroke-width="2" stroke-dasharray="5 4"/>
     </svg>`;
   }
 
@@ -899,9 +916,9 @@ const UI = (() => {
       <ellipse cx="0" cy="0" rx="${px(tw / 2)}" ry="${px(Math.max(5, tw * 0.13))}" fill="none" stroke="${stroke}" stroke-width="2" ${dash}/>
     `;
     return `<svg viewBox="0 0 420 210" role="img" aria-label="Tanque. El tamaño sigue el volumen y el contorno sigue la temperatura.">
-      <text x="24" y="24" fill="#5e574c" font-size="14">Tanque · se mueve con el volumen y con cada grado</text>
+      <text x="24" y="24" fill="var(--svg-muted)" font-size="14">Tanque · se mueve con el volumen y con cada grado</text>
       <g transform="translate(210 186)">
-        ${tank(w0, h0, "none", "none", "#8a8175", 'stroke-dasharray="5 4"')}
+        ${tank(w0, h0, "none", "none", "var(--svg-ghost)", 'stroke-dasharray="5 4"')}
         ${tank(w, h, body, lid, "none", "")}
       </g>
     </svg>`;
@@ -919,13 +936,13 @@ const UI = (() => {
     const top = Math.max(tubeTop + 4, Math.min(bulbY - 6, rest - pixels * 0.42));
     const tubeX = cx - tubeW / 2;
     return `<svg viewBox="0 0 420 220" role="img" aria-label="Termómetro. El tamaño sigue el volumen y la columna sigue la temperatura.">
-      <text x="24" y="24" fill="#5e574c" font-size="14">${pixels >= 0 ? "La columna sube con cada grado" : "La columna baja con cada grado"}</text>
-      <rect x="${px(tubeX)}" y="${px(tubeTop)}" width="${px(tubeW)}" height="${px(tubeH)}" rx="${px(tubeW / 2)}" fill="#f7f4ef" stroke="#8a8175" stroke-width="2.5"/>
-      <circle cx="${cx}" cy="${bulbY}" r="${px(bulbR)}" fill="${mercury}" stroke="#8a8175" stroke-width="2.5"/>
+      <text x="24" y="24" fill="var(--svg-muted)" font-size="14">${pixels >= 0 ? "La columna sube con cada grado" : "La columna baja con cada grado"}</text>
+      <rect x="${px(tubeX)}" y="${px(tubeTop)}" width="${px(tubeW)}" height="${px(tubeH)}" rx="${px(tubeW / 2)}" fill="var(--svg-glass)" stroke="var(--svg-ghost)" stroke-width="2.5"/>
+      <circle cx="${cx}" cy="${bulbY}" r="${px(bulbR)}" fill="${mercury}" stroke="var(--svg-ghost)" stroke-width="2.5"/>
       <rect x="${px(cx - tubeW * 0.28)}" y="${px(top)}" width="${px(tubeW * 0.56)}" height="${px(bulbY - top)}" fill="${mercury}"/>
       <circle cx="${cx}" cy="${bulbY}" r="${px(bulbR * 0.55)}" fill="${mercury}"/>
-      <line x1="${px(tubeX - 18)}" y1="${px(rest)}" x2="${px(tubeX + tubeW + 10)}" y2="${px(rest)}" stroke="#a34b28" stroke-dasharray="4 3" stroke-width="1.5"/>
-      <text x="${px(tubeX + tubeW + 18)}" y="${px(rest + 4)}" fill="#8d3d22" font-size="13">nivel inicial</text>
+      <line x1="${px(tubeX - 18)}" y1="${px(rest)}" x2="${px(tubeX + tubeW + 10)}" y2="${px(rest)}" stroke="var(--svg-mark)" stroke-dasharray="4 3" stroke-width="1.5"/>
+      <text x="${px(tubeX + tubeW + 18)}" y="${px(rest + 4)}" fill="var(--svg-stroke)" font-size="13">nivel inicial</text>
     </svg>`;
   }
 
