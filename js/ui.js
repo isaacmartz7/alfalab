@@ -68,17 +68,18 @@ const UI = (() => {
   function bindTheme() {
     const saved = localStorage.getItem("alfalab-theme");
     applyTheme(saved === "dark" ? "dark" : "light");
-    document.querySelectorAll("[data-theme-choice]").forEach((button) => {
-      button.addEventListener("click", () => applyTheme(button.dataset.themeChoice));
+    $("theme-toggle").addEventListener("click", () => {
+      applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
     });
   }
 
   function applyTheme(theme) {
-    document.documentElement.dataset.theme = theme;
-    try { localStorage.setItem("alfalab-theme", theme); } catch (e) {}
-    document.querySelectorAll("[data-theme-choice]").forEach((button) => {
-      button.setAttribute("aria-pressed", button.dataset.themeChoice === theme ? "true" : "false");
-    });
+    const dark = theme === "dark";
+    document.documentElement.dataset.theme = dark ? "dark" : "light";
+    try { localStorage.setItem("alfalab-theme", dark ? "dark" : "light"); } catch (e) {}
+    const button = $("theme-toggle");
+    button.setAttribute("aria-pressed", dark ? "true" : "false");
+    button.setAttribute("aria-label", dark ? "Cambiar a modo claro" : "Cambiar a modo oscuro");
   }
 
   function bindTabs() {

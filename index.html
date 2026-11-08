@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AlfaLab</title>
-  <link rel="stylesheet" href="css/styles.css?v=tema">
+  <link rel="stylesheet" href="css/styles.css?v=icono">
   <script>
     try {
       var tema = localStorage.getItem("alfalab-theme");
@@ -15,9 +15,16 @@
 <body>
   <div class="wrap">
     <header>
-      <div class="theme" role="group" aria-label="Apariencia">
-        <button type="button" data-theme-choice="light" aria-pressed="true">Claro</button>
-        <button type="button" data-theme-choice="dark" aria-pressed="false">Oscuro</button>
+      <div class="theme">
+        <button type="button" id="theme-toggle" aria-pressed="false" aria-label="Cambiar a modo oscuro">
+          <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M12 2.4v2.3M12 19.3v2.3M4.7 4.7l1.6 1.6M17.7 17.7l1.6 1.6M2.4 12h2.3M19.3 12h2.3M4.7 19.3l1.6-1.6M17.7 6.3l1.6-1.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20.2 14.6A8.2 8.2 0 0 1 9.4 3.8 8.3 8.3 0 1 0 20.2 14.6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          </svg>
+        </button>
       </div>
       <p class="eyebrow">Simulador de dilatación</p>
       <h1>AlfaLab</h1>
@@ -288,6 +295,6 @@
 
   <script src="js/materials.js?v=alfalab"></script>
   <script src="js/physics.js?v=alfalab"></script>
-  <script src="js/ui.js?v=tema"></script>
+  <script src="js/ui.js?v=icono"></script>
 </body>
 </html>

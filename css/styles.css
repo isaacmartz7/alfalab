@@ -170,36 +170,35 @@ header {
   position: absolute;
   top: 0.85rem;
   right: 0.9rem;
-  display: flex;
-  gap: 0.12rem;
-  padding: 0.16rem;
-  background: var(--tab-bg);
-  border: 1px solid var(--tab-line);
-  border-radius: 999px;
 }
 
 .theme button {
-  border: 0;
-  background: transparent;
+  display: grid;
+  place-items: center;
+  width: 2.05rem;
+  height: 2.05rem;
+  padding: 0;
+  border: 1px solid var(--tab-line);
+  background: var(--tab-bg);
   color: var(--ink);
   border-radius: 999px;
-  padding: 0.22rem 0.62rem;
-  font: inherit;
-  font-size: 0.82rem;
-  line-height: 1.3;
   cursor: pointer;
 }
 
 .theme button:hover { background: var(--tab-hover); }
 
-.theme button[aria-pressed="true"] {
-  background: var(--indigo);
-  color: #fff;
+.theme svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  grid-area: 1 / 1;
 }
 
-.theme button[aria-pressed="true"]:hover { background: var(--indigo); }
+.theme .icon-moon { display: none; }
 
-.eyebrow, h1 { padding-right: 9.2rem; }
+html[data-theme="dark"] .theme .icon-sun { display: none; }
+html[data-theme="dark"] .theme .icon-moon { display: block; }
+
+.eyebrow, h1 { padding-right: 2.8rem; }
 
 .eyebrow {
   margin: 0;
@@ -666,7 +665,7 @@ footer {
 
 @media (max-width: 560px) {
   .wrap { padding: 1.15rem 0.9rem 2.4rem; }
-  .eyebrow, h1 { padding-right: 8.4rem; }
+  .eyebrow, h1 { padding-right: 2.6rem; }
   .temps { grid-template-columns: 1fr; }
   .bar-row { grid-template-columns: 1fr; }
   .bar-value { text-align: left; }
