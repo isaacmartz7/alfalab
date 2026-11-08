@@ -273,6 +273,8 @@ h2 {
   align-items: start;
 }
 
+.workspace > * { min-width: 0; }
+
 .card {
   background: var(--card);
   border: 1px solid var(--card-line);
@@ -283,12 +285,14 @@ h2 {
 
 .card.result {
   padding: 0 1.2rem 1.25rem;
-  overflow: hidden;
+  overflow: visible;
   border: 0;
+  min-width: 0;
 }
 
 .banner {
   margin: 0 -1.2rem 1rem;
+  border-radius: 18px 18px 0 0;
   padding: 1.05rem 1.25rem 1.1rem;
   color: #fff;
   background: linear-gradient(115deg, #e24b2c 0%, #f07a32 58%, #f2b04a 100%);
@@ -553,9 +557,10 @@ button.secondary:hover { filter: brightness(1.05); }
 }
 
 .figure svg {
-  width: 100%;
-  height: auto;
   display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
   font-family: "Segoe UI", sans-serif;
 }
 
