@@ -12,7 +12,15 @@
   <meta property="og:url" content="https://alfalab-nu.vercel.app/">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="es">
-  <link rel="stylesheet" href="css/styles.css?v=grafica">
+  <link rel="stylesheet" href="css/styles.css?v=3d">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
   <script>
     try {
       var tema = localStorage.getItem("alfalab-theme");
@@ -290,6 +298,7 @@
             <h2 id="cmp-headline"></h2>
           </div>
           <p class="error" id="cmp-error" hidden></p>
+          <figure class="figure stage" id="cmp-figure"></figure>
           <div class="bars" id="cmp-bars"></div>
           <p class="insight" id="cmp-insight"></p>
         </div>
@@ -301,8 +310,9 @@
     </footer>
   </div>
 
+  <script type="module" src="js/scene3d.js?v=3d8"></script>
   <script src="js/materials.js?v=alfalab"></script>
   <script src="js/physics.js?v=alfalab"></script>
-  <script src="js/ui.js?v=grafica"></script>
+  <script src="js/ui.js?v=3d2"></script>
 </body>
 </html>

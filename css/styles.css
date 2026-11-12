@@ -570,6 +570,79 @@ button.secondary:hover { filter: brightness(1.05); }
   margin-top: 0.5rem;
 }
 
+.figure.stage {
+  padding: 0.55rem 0.55rem 0.85rem;
+}
+
+.stage-view {
+  position: relative;
+  height: 360px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f7f1e8;
+  touch-action: none;
+}
+
+html[data-theme="dark"] .stage-view { background: #221c18; }
+
+.stage-view canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  outline: none;
+}
+
+.stage-view canvas:active { cursor: grabbing; }
+
+.stage-view canvas:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -4px;
+}
+
+.stage-title,
+.stage-hint {
+  position: absolute;
+  margin: 0;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--card) 84%, transparent);
+  border-radius: 999px;
+}
+
+.stage-title {
+  top: 0.55rem;
+  left: 0.65rem;
+  max-width: calc(100% - 8.6rem);
+  padding: 0.18rem 0.6rem;
+  font-size: 0.92rem;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.stage-hint {
+  left: 0.65rem;
+  bottom: 0.55rem;
+  padding: 0.16rem 0.55rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.stage-reset {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.22rem 0.65rem;
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.stage-reset:hover { background: var(--nudge-hover); }
+
 .figure.graph { margin-top: 0.75rem; }
 
 .metrics {
@@ -674,6 +747,7 @@ footer {
   .temps { grid-template-columns: 1fr; }
   .bar-row { grid-template-columns: 1fr; }
   .bar-value { text-align: left; }
+  .stage-view { height: 280px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

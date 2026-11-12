@@ -80,6 +80,7 @@ const UI = (() => {
     const button = $("theme-toggle");
     button.setAttribute("aria-pressed", dark ? "true" : "false");
     button.setAttribute("aria-label", dark ? "Cambiar a modo claro" : "Cambiar a modo oscuro");
+    if (window.Scene3D) window.Scene3D.syncTheme();
   }
 
   function bindTabs() {
@@ -95,6 +96,7 @@ const UI = (() => {
     document.querySelectorAll("[data-panel-body]").forEach((panel) => {
       panel.hidden = panel.dataset.panelBody !== id;
     });
+    if (window.Scene3D) requestAnimationFrame(() => window.Scene3D.resizeAll());
   }
 
   function bindSlider(sliderId, fieldId) {
@@ -315,7 +317,7 @@ const UI = (() => {
       clearDiameterResult();
       clearGraph();
       showError("calc-error", $("calc-steps"), ["calc-insight", "calc-degree"], problem || diameter.error);
-      setFigure($("calc-figure"), emptyFigure(), "Cuando los datos estén completos, acá aparece la figura.");
+      showStage($("calc-figure"), { empty: true }, "Cuando los datos estén completos, acá aparece la figura.");
       return;
     }
     showError("calc-error", $("calc-steps"), [], "");
@@ -371,25 +373,28 @@ const UI = (() => {
 
     const si = Physics.toSI(initial, unitId);
     const motion = picturePixels(dT, coefficient);
-    const figure = kind === "lineal"
-      ? barFigure(pictureSize(si, "length"), motion)
+    const figureSize = kind === "lineal"
+      ? pictureSize(si, "length")
       : kind === "superficial"
-        ? plateFigure(
-          diameter.value
-            ? pictureSize(si, "area") * 0.35 + pictureSize(diameter.si, "length") * 0.65
-            : pictureSize(si, "area"),
-          motion,
-          Boolean(diameter.value),
-        )
-        : vesselFigure(pictureSize(si, "volume"), motion);
+        ? (diameter.value
+          ? pictureSize(si, "area") * 0.35 + pictureSize(diameter.si, "length") * 0.65
+          : pictureSize(si, "area"))
+        : pictureSize(si, "volume");
     const figureCaption = kind === "lineal"
-      ? "El largo del riel sigue la longitud que escribís. La junta se mueve con cada grado: se cierra al calentar y se abre al enfriar. El dibujo exagera ese movimiento; los números de arriba son el cálculo real."
+      ? "Cada material tiene su forma. La junta se cierra al calentar y se abre al enfriar. Arrastrá para girar la figura. El dibujo exagera ese movimiento; los números de arriba son el cálculo real."
       : kind === "superficial" && diameter.value
-        ? "El disco sigue el área y el diámetro que escribís, y crece o se achica con cada grado. El círculo punteado es el tamaño inicial. El dibujo exagera el cambio; los números son el cálculo real."
+        ? "El disco es el material que elegiste. Crece o se achica con el área, el diámetro y cada grado. Arrastrá para girarlo. El dibujo exagera el cambio; los números son el cálculo real."
         : kind === "superficial"
-          ? "La placa sigue el área que escribís y crece o se achica con cada grado. El borde punteado es el tamaño inicial. El dibujo exagera el cambio; los números son el cálculo real."
-          : "El tanque sigue el volumen que escribís y crece o se achica con cada grado, en las tres direcciones. El contorno punteado es el tamaño inicial. El dibujo exagera el cambio; los números son el cálculo real.";
-    setFigure($("calc-figure"), figure, figureCaption);
+          ? "La placa es el material que elegiste y crece o se achica con el área y con cada grado. Arrastrá para girarla. El dibujo exagera el cambio; los números son el cálculo real."
+          : "La figura es el material que elegiste. Crece o se achica en las tres direcciones, con el volumen y con cada grado. Arrastrá para girarla. El dibujo exagera el cambio; los números son el cálculo real.";
+    showStage($("calc-figure"), {
+      kind,
+      materialId: material.id,
+      label: material.name,
+      size: figureSize,
+      motion,
+      asDisk: Boolean(diameter.value),
+    }, figureCaption);
     $("calc-insight").textContent = insightCalc(material, kind, result.fraction, dT);
     const oneDegree = Physics.expansion(Physics.toSI(initial, unitId), coefficient, 1);
     drawChangeGraph(spec, oneDegree.change, dT, ti);
@@ -499,7 +504,7 @@ const UI = (() => {
       $("ap-sub").textContent = "";
       showError("ap-error", $("ap-steps"), ["ap-insight", "ap-degree"], problem);
       $("ap-metrics").replaceChildren();
-      setFigure($("ap-figure"), beakerFigure(1, 0), "Cuando los datos estén completos, acá aparece el recipiente.");
+      showStage($("ap-figure"), { empty: true }, "Cuando los datos estén completos, acá aparece el recipiente.");
       return;
     }
     showError("ap-error", $("ap-steps"), [], "");
@@ -542,11 +547,14 @@ const UI = (() => {
     ]);
 
     const apparentSi = Physics.toSI(initial, unitId);
-    setFigure(
-      $("ap-figure"),
-      beakerFigure(pictureSize(apparentSi, "volume"), picturePixels(dT, Math.abs(betaLiquid - betaContainer))),
-      "El termómetro sigue el volumen que escribís. La columna sube o baja con cada grado, por la diferencia entre el líquido y el recipiente. La marca punteada es el nivel inicial. El dibujo exagera ese movimiento; los números son el cálculo real.",
-    );
+    showStage($("ap-figure"), {
+      kind: "aparente",
+      liquidId: liquid.id,
+      containerId: container.id,
+      label: `${liquid.name} en ${container.short}`,
+      size: pictureSize(apparentSi, "volume"),
+      motion: picturePixels(dT, betaLiquid - betaContainer),
+    }, "El recipiente es el material sólido y el líquido tiene su color. Arrastrá para girar la figura. El nivel se mueve con cada grado, por la diferencia entre los dos. La marca es el nivel inicial. El dibujo exagera ese movimiento; los números son el cálculo real.");
     $("ap-insight").textContent = `${liquid.article} ${liquid.short} se dilata más que el ${container.short}. Por eso un termómetro de mercurio en vidrio puede marcar la temperatura: la columna sube por la diferencia, no por todo el cambio del líquido.`;
     const oneApparent = Physics.apparent(Physics.toSI(initial, unitId), betaLiquid, betaContainer, 1);
     $("ap-degree").textContent = `Por cada grado, el nivel cambia ${phrase(oneApparent.apparent, unitId, "volume")}. Arrastrá la temperatura para ver cómo se acumula.`;
@@ -621,6 +629,7 @@ const UI = (() => {
       $("cmp-headline").textContent = "Falta un dato para comparar.";
       showError("cmp-error", { replaceChildren() {} }, ["cmp-insight"], problem);
       $("cmp-bars").replaceChildren();
+      showStage($("cmp-figure"), { empty: true }, "Cuando los datos estén completos, acá aparecen los materiales.");
       return;
     }
     showError("cmp-error", { replaceChildren() {} }, [], "");
@@ -673,6 +682,18 @@ const UI = (() => {
       row.append(name, track, value);
       bars.appendChild(row);
     });
+
+    const compareSize = pictureSize(Physics.toSI(initial, unitId), spec.dimension);
+    showStage($("cmp-figure"), {
+      kind: "comparar",
+      expansion: kind,
+      items: items.map((item) => ({
+        materialId: item.material.id,
+        label: item.material.short,
+        motion: picturePixels(dT, item.coefficient),
+        size: compareSize,
+      })),
+    }, "Cada material tiene su forma. Arrastrá para girar la escena. El tamaño cambia con la temperatura; el dibujo exagera ese cambio y las barras de abajo son el cálculo real.");
 
     $("cmp-insight").textContent = compareInsight(items, spec);
   }
@@ -835,10 +856,26 @@ const UI = (() => {
   }
 
   function picturePixels(deltaT, coefficient) {
-    if (!Number.isFinite(deltaT) || deltaT === 0 || !Number.isFinite(coefficient)) return 0;
+    if (!Number.isFinite(deltaT) || deltaT === 0 || !Number.isFinite(coefficient) || coefficient === 0) return 0;
     const compared = Math.abs(coefficient) / 1.2e-5;
     const loudness = Math.min(1.8, Math.max(0.35, compared ** 0.33));
-    return deltaT * 3.2 * loudness;
+    return deltaT * 3.2 * loudness * Math.sign(coefficient);
+  }
+
+  function showStage(host, spec, caption) {
+    if (window.Scene3D && window.Scene3D.show(host, spec, caption)) return;
+    setFigure(host, fallbackSvg(spec), caption);
+  }
+
+  function fallbackSvg(spec) {
+    if (!spec || spec.empty) return emptyFigure();
+    const motion = spec.motion || 0;
+    const size = spec.size || 1;
+    if (spec.kind === "lineal") return barFigure(size, motion);
+    if (spec.kind === "superficial") return plateFigure(size, motion, Boolean(spec.asDisk));
+    if (spec.kind === "volumetrica") return vesselFigure(size, motion);
+    if (spec.kind === "aparente") return beakerFigure(size, motion);
+    return emptyFigure();
   }
 
   function heatColor(motion, hot, cold) {
