@@ -317,7 +317,8 @@ const UI = (() => {
       clearDiameterResult();
       clearGraph();
       showError("calc-error", $("calc-steps"), ["calc-insight", "calc-degree"], problem || diameter.error);
-      showStage($("calc-figure"), { empty: true }, "Cuando los datos estén completos, acá aparece la figura.");
+      if (kind === "lineal") hideStage($("calc-figure"));
+      else showStage($("calc-figure"), { empty: true }, "Cuando los datos estén completos, acá aparece la figura.");
       return;
     }
     showError("calc-error", $("calc-steps"), [], "");
@@ -371,30 +372,30 @@ const UI = (() => {
     }
     fillList($("calc-steps"), steps);
 
-    const si = Physics.toSI(initial, unitId);
-    const motion = picturePixels(dT, coefficient);
-    const figureSize = kind === "lineal"
-      ? pictureSize(si, "length")
-      : kind === "superficial"
+    if (kind === "lineal") {
+      hideStage($("calc-figure"));
+    } else {
+      const si = Physics.toSI(initial, unitId);
+      const motion = picturePixels(dT, coefficient);
+      const figureSize = kind === "superficial"
         ? (diameter.value
           ? pictureSize(si, "area") * 0.35 + pictureSize(diameter.si, "length") * 0.65
           : pictureSize(si, "area"))
         : pictureSize(si, "volume");
-    const figureCaption = kind === "lineal"
-      ? "Cada material tiene su forma. La junta se cierra al calentar y se abre al enfriar. Arrastrá para girar la figura. El dibujo exagera ese movimiento; los números de arriba son el cálculo real."
-      : kind === "superficial" && diameter.value
+      const figureCaption = kind === "superficial" && diameter.value
         ? "El disco es el material que elegiste. Crece o se achica con el área, el diámetro y cada grado. Arrastrá para girarlo. El dibujo exagera el cambio; los números son el cálculo real."
         : kind === "superficial"
           ? "La placa es el material que elegiste y crece o se achica con el área y con cada grado. Arrastrá para girarla. El dibujo exagera el cambio; los números son el cálculo real."
           : "La figura es el material que elegiste. Crece o se achica en las tres direcciones, con el volumen y con cada grado. Arrastrá para girarla. El dibujo exagera el cambio; los números son el cálculo real.";
-    showStage($("calc-figure"), {
-      kind,
-      materialId: material.id,
-      label: material.name,
-      size: figureSize,
-      motion,
-      asDisk: Boolean(diameter.value),
-    }, figureCaption);
+      showStage($("calc-figure"), {
+        kind,
+        materialId: material.id,
+        label: material.name,
+        size: figureSize,
+        motion,
+        asDisk: Boolean(diameter.value),
+      }, figureCaption);
+    }
     $("calc-insight").textContent = insightCalc(material, kind, result.fraction, dT);
     const oneDegree = Physics.expansion(Physics.toSI(initial, unitId), coefficient, 1);
     drawChangeGraph(spec, oneDegree.change, dT, ti);
@@ -862,7 +863,14 @@ const UI = (() => {
     return deltaT * 3.2 * loudness * Math.sign(coefficient);
   }
 
+  function hideStage(host) {
+    if (window.Scene3D && window.Scene3D.release) window.Scene3D.release(host);
+    else host.replaceChildren();
+    host.hidden = true;
+  }
+
   function showStage(host, spec, caption) {
+    host.hidden = false;
     if (window.Scene3D && window.Scene3D.show(host, spec, caption)) return;
     setFigure(host, fallbackSvg(spec), caption);
   }
