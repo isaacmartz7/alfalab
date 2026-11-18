@@ -317,8 +317,11 @@ const UI = (() => {
       clearDiameterResult();
       clearGraph();
       showError("calc-error", $("calc-steps"), ["calc-insight", "calc-degree"], problem || diameter.error);
-      if (kind === "lineal") hideStage($("calc-figure"));
-      else showStage($("calc-figure"), { empty: true }, "Cuando los datos estén completos, acá aparece la figura.");
+      if (kind === "lineal") {
+        showSvgFigure($("calc-figure"), { empty: true }, "Cuando los datos estén completos, acá aparece la figura.");
+      } else {
+        showStage($("calc-figure"), { empty: true }, "Cuando los datos estén completos, acá aparece la figura.");
+      }
       return;
     }
     showError("calc-error", $("calc-steps"), [], "");
@@ -372,11 +375,15 @@ const UI = (() => {
     }
     fillList($("calc-steps"), steps);
 
+    const si = Physics.toSI(initial, unitId);
+    const motion = picturePixels(dT, coefficient);
     if (kind === "lineal") {
-      hideStage($("calc-figure"));
+      showSvgFigure($("calc-figure"), {
+        kind,
+        size: pictureSize(si, "length"),
+        motion,
+      }, "El largo del riel sigue la longitud que escribís. La junta se mueve con cada grado: se cierra al calentar y se abre al enfriar. El dibujo exagera ese movimiento; los números de arriba son el cálculo real.");
     } else {
-      const si = Physics.toSI(initial, unitId);
-      const motion = picturePixels(dT, coefficient);
       const figureSize = kind === "superficial"
         ? (diameter.value
           ? pictureSize(si, "area") * 0.35 + pictureSize(diameter.si, "length") * 0.65
@@ -863,10 +870,11 @@ const UI = (() => {
     return deltaT * 3.2 * loudness * Math.sign(coefficient);
   }
 
-  function hideStage(host) {
+  function showSvgFigure(host, spec, caption) {
     if (window.Scene3D && window.Scene3D.release) window.Scene3D.release(host);
-    else host.replaceChildren();
-    host.hidden = true;
+    host.hidden = false;
+    host.classList.remove("stage");
+    setFigure(host, fallbackSvg(spec), caption);
   }
 
   function showStage(host, spec, caption) {
