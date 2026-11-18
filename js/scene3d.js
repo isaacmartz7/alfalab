@@ -1018,6 +1018,32 @@ function ensure(host) {
   return view;
 }
 
+function release(host) {
+  const view = host._stage;
+  if (!view) {
+    host.replaceChildren();
+    host.classList.remove("stage");
+    return;
+  }
+  views.delete(view);
+  if (view.failed) {
+    delete host._stage;
+    host.replaceChildren();
+    host.classList.remove("stage");
+    return;
+  }
+  if (view.content) {
+    view.scene.remove(view.content);
+    disposeObject(view.content);
+  }
+  view.controls.dispose();
+  view.renderer.dispose();
+  if (view.renderer.forceContextLoss) view.renderer.forceContextLoss();
+  delete host._stage;
+  host.replaceChildren();
+  host.classList.remove("stage");
+}
+
 function show(host, spec, caption) {
   const view = ensure(host);
   if (!view || view.failed) return false;
@@ -1064,4 +1090,4 @@ function resizeAll() {
   views.forEach(resize);
 }
 
-window.Scene3D = { show, syncTheme, resizeAll };
+window.Scene3D = { show, release, syncTheme, resizeAll };
